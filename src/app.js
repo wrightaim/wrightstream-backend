@@ -16,6 +16,11 @@ app.use(bodyParser.json())
 // USER ROUTES
 //////////////////////////////////////////////////////////////////////////////
 //AUTH AND SHOP ROUTES
+app.use('/shops', require('./routes/Shop/shops'))
+app.use('/auth', require('./routes/Shop/auth'))
+app.use('/stores', require('./routes/Shop/stores'))
+
+
 
 //////////////////////////////////////////////////////////////////////////////
 // Default Route
