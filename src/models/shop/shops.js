@@ -70,7 +70,7 @@ function getOneStaff(staff_id, shop_id) {
 
 function getStaffByEmail(staff_email, shop_id) {
   return (knex('staff')
-  .where({email: staff_emailß})
+  .where({email: staff_email})
   .andWhere({shop_id:shop_id})
   .first())
 }
