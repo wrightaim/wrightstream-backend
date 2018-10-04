@@ -50,66 +50,66 @@ const AllListingActive = (access_token, access_token_secret, shop_id) => {
   })
 }
 
-// const findAllPurchases = function(accessToken, accesTokenSecret, shop_id){
-//   let userId;
-//   let storeId;
-//   let wrightStore;
-//   return findEtsyStore(shop_id).then(store => {
-//     wrightStore = store.id
-//     return getSelf(accessToken, accesTokenSecret)
-//   }).then(self => {
-//     userId = self[0].user_id
-//     return getStore(userId, accessToken, accesTokenSecret)
-//   }).then(storeInfo => {
-//     storeId = storeInfo[0].shop_id
-//     return etsyOAuthGet(`/shops/${storeId}/transactions`, accessToken, accesTokenSecret)
-//   }).then(data => {
-//     return createPurchaseList(data)
-//   }).then(async function(purchaseList){
-//     let listedPurchaseData = []
-//     for (var receipt in purchaseList) {
-//       const purchase = {}
-//       let purchaseTime = moment.utc(purchaseList[receipt][0].creation_tsz * 1000)
-//       purchaseTime = moment(purchaseTime).format();
-//       purchase.receipt_id = purchaseList[receipt][0].receipt_id
-//       purchase.shop_id = shop_id
-//       purchase.store_id = wrightStore
-//       purchase.purchase_date = purchaseTime
-//       purchase.service = null
-//       purchase.tracking = null
-//       purchase.delivery_date = null
-//       purchase.items = []
-//       purchase.bundles = []
-//       for(const transaction of purchaseList[receipt]){
-//         let item = {}
-//         let bundle = {}
-//
-//         const product = await knex('products').where({listing_id: transaction.listing_id})
-//         if(product){
-//           const items = await knex('items').where({product_id: product[0].id}).first()
-//           if(items){
-//             item.id = items.id
-//             item.item_qty = transaction.quantity
-//             purchase.items.push(item)
-//           }
-//           else{
-//             const bundles = await knex('bundles').where({product_id: product[0].id}).first()
-//             if(bundles){
-//               bundle.id = bundles.id
-//               bundle.bundle_qty = transaction.quantity
-//               purchase.bundles.push(bundle)
-//             }
-//           }
-//         }
-//       }
-//       listedPurchaseData.push(purchase)
-//     }
-//     const addedPurchases = listedPurchaseData.map(purchase => {
-//       return addPurchases(purchase, wrightStore, shop_id)
-//     })
-//     return Promise.all(addedPurchases)
-//   })
-// }
+const findAllPurchases = function(accessToken, accesTokenSecret, shop_id){
+  let userId;
+  let storeId;
+  let wrightStore;
+  return findEtsyStore(shop_id).then(store => {
+    wrightStore = store.id
+    return getSelf(accessToken, accesTokenSecret)
+  }).then(self => {
+    userId = self[0].user_id
+    return getStore(userId, accessToken, accesTokenSecret)
+  }).then(storeInfo => {
+    storeId = storeInfo[0].shop_id
+    return etsyOAuthGet(`/shops/${storeId}/transactions`, accessToken, accesTokenSecret)
+  }).then(data => {
+    return createPurchaseList(data)
+  }).then(async function(purchaseList){
+    let listedPurchaseData = []
+    for (var receipt in purchaseList) {
+      const purchase = {}
+      let purchaseTime = moment.utc(purchaseList[receipt][0].creation_tsz * 1000)
+      purchaseTime = moment(purchaseTime).format();
+      purchase.receipt_id = purchaseList[receipt][0].receipt_id
+      purchase.shop_id = shop_id
+      purchase.store_id = wrightStore
+      purchase.purchase_date = purchaseTime
+      purchase.service = null
+      purchase.tracking = null
+      purchase.delivery_date = null
+      purchase.items = []
+      purchase.bundles = []
+      for(const transaction of purchaseList[receipt]){
+        let item = {}
+        let bundle = {}
+
+        const product = await knex('products').where({listing_id: transaction.listing_id})
+        if(product){
+          const items = await knex('items').where({product_id: product[0].id}).first()
+          if(items){
+            item.id = items.id
+            item.item_qty = transaction.quantity
+            purchase.items.push(item)
+          }
+          else{
+            const bundles = await knex('bundles').where({product_id: product[0].id}).first()
+            if(bundles){
+              bundle.id = bundles.id
+              bundle.bundle_qty = transaction.quantity
+              purchase.bundles.push(bundle)
+            }
+          }
+        }
+      }
+      listedPurchaseData.push(purchase)
+    }
+    const addedPurchases = listedPurchaseData.map(purchase => {
+      return addPurchases(purchase, wrightStore, shop_id)
+    })
+    return Promise.all(addedPurchases)
+  })
+}
 //
 // ///////////////////////////////////////////////////////////////////////////////////////////
 // /////////Helper Functions
@@ -189,3 +189,4 @@ module.exports = {
   getSelf,
   AllListingActive,
   findAllPurchases
+}

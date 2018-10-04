@@ -16,10 +16,21 @@ app.use(bodyParser.json())
 // USER ROUTES
 //////////////////////////////////////////////////////////////////////////////
 //AUTH AND SHOP ROUTES
-app.use('/shops', require('./routes/Shop/shops'))
-app.use('/auth', require('./routes/Shop/auth'))
-// app.use('/stores', require('./routes/Shop/stores'))
+app.use('/shops', require('./routes/shop/shops'))
+app.use('/auth', require('./routes/shop/auth'))
+app.use('/auth/etsy', require('./routes/shop/authEtsy'))
+app.use('/etsy', require('./routes/shop/etsy'))
+app.use('/stores', require('./routes/shop/stores'))
 
+//PRODUCTS
+app.use('/products', require('./routes/products/products'))
+app.use('/categories', require('./routes/products/categories'))
+app.use('/kinds', require('./routes/products/kinds'))
+app.use('/types', require('./routes/products/types'))
+app.use('/sources', require('./routes/Products/sources'))
+app.use('/supplies', require('./routes/Products/supplies'))
+app.use('/items', require('./routes/Products/items'))
+app.use('/bundles', require('./routes/Products/bundles'))
 
 
 //////////////////////////////////////////////////////////////////////////////
