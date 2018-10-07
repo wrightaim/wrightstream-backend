@@ -32,6 +32,8 @@ app.use('/supplies', require('./routes/Products/supplies'))
 app.use('/items', require('./routes/Products/items'))
 app.use('/bundles', require('./routes/Products/bundles'))
 
+//MEASUREMENTS
+app.use('/helper', require('./routes/helper/measurement'))
 
 //////////////////////////////////////////////////////////////////////////////
 // Default Route

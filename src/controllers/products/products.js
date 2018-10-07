@@ -4,7 +4,7 @@ function getAllUnlinked(req, res, next) {
   if (!req.params.shop_id) {
     return next({status: 400, message: 'Missing product fields'})
   }
-  productsModel.getAllUnlinked(req.params.shopId)
+  productsModel.getAllUnlinked(req.params.shop_id)
   .then(data => {
     res.status(200).send({data})
   }).catch(next)

@@ -21,29 +21,6 @@ function getAllStore(req, res, next) {
   })
   .catch(next)
 }
-
-function createStore(req, res, next) {
-  if (!req.params.shop_id || req.body) {
-    return next({status: 400, message: 'Need to know indicated store'})
-  }
-  storeModel.createStore(req.params.shop_id, req.body)
-  .then(data => {
-    res.status(200).send({data})
-  })
-  .catch(next)
-}
-
-function updateStore(req, res, next) {
-  if (!req.params.store_id || !req.body) {
-    return next({status: 400, message: 'Need to know indicated store'})
-  }
-  storeModel.createStore(req.params.store_id, req.body)
-  .then(data => {
-    res.status(200).send({data})
-  })
-  .catch(next)
-}
-
 function removeStore(req, res, next) {
   if (!req.params.store_id) {
     return next({status: 400, message: 'Need to know indicated store'})
@@ -59,7 +36,5 @@ function removeStore(req, res, next) {
 module.exports = {
   getAllStore,
   getOneStore,
-  createStore,
-  removeStore,
-  updateStore
+  removeStore
 }
