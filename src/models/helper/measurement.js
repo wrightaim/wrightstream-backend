@@ -63,8 +63,6 @@ const orderPredictor = async(shop_id, body) => {
   if(items_completed && bundles_completed) {
     combined_supplies = await combine(items_completed, bundles_completed)
   }
-
-
   if (body.compare === true) {
     if (combined_supplies) {
       let supplies_compared = await supplyCompare(combined_supplies, shop_id)

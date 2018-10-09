@@ -27,13 +27,24 @@ app.use('/products', require('./routes/products/products'))
 app.use('/categories', require('./routes/products/categories'))
 app.use('/kinds', require('./routes/products/kinds'))
 app.use('/types', require('./routes/products/types'))
-app.use('/sources', require('./routes/Products/sources'))
-app.use('/supplies', require('./routes/Products/supplies'))
-app.use('/items', require('./routes/Products/items'))
-app.use('/bundles', require('./routes/Products/bundles'))
+app.use('/sources', require('./routes/products/sources'))
+app.use('/supplies', require('./routes/products/supplies'))
+app.use('/items', require('./routes/products/items'))
+app.use('/bundles', require('./routes/products/bundles'))
 
 //MEASUREMENTS
 app.use('/helper', require('./routes/helper/measurement'))
+
+//ADMIN
+app.use('/admin_staff', require('./routes/admin/staff'))
+app.use('/admin_products', require('./routes/admin/products'))
+app.use('/admin_purchases', require('./routes/admin/purchases'))
+app.use('/admin_supplies', require('./routes/admin/supplies'))
+
+//INVENTORY
+app.use('/inventory', require('./routes/inventory/inventory'))
+app.use('/orders', require('./routes/inventory/orders'))
+app.use('/lists', require('./routes/inventory/lists'))
 
 //////////////////////////////////////////////////////////////////////////////
 // Default Route

@@ -19,13 +19,21 @@ function createShop(body) {
   let logo = body.logo
     ? body.logo
     : null
-  return getShopByName(main_name).then(data => {
+  return getShopByName(main_name)
+  .then(data => {
     if (data)
       throw {
         status : 400,
         message: 'Shop name exists'
       }
-    return (knex('shops').insert({shop_name: shop_name, name: main_name, email: body.email, logo}).returning('*'))
+    return (knex('shops')
+    .insert({shop_name: shop_name, name: main_name, email: body.email, logo})
+    .returning('*'))
+  })
+  .then(new_shop => {
+    return (knex('priority').insert({shop_id: new_shop[0].id}).returning('*'))
+  }).then(data => {
+    return (knex('shops').where({id: data[0].shop_id}).returning('*'))
   })
 }
 
