@@ -40,6 +40,7 @@ function wrightStream(shop_id) {
 //////////////////////////////////////////////////////////////////////////////////////////////
 
 const orderPredictor = async(shop_id, body) => {
+  body.compare === true ? body.compare = true : body.compare = false
   const items = body.items || null
   const bundles = body.bundles || null
   let empty = []

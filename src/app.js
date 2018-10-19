@@ -35,6 +35,14 @@ app.use('/bundles', require('./routes/products/bundles'))
 //MEASUREMENTS
 app.use('/helper', require('./routes/helper/measurement'))
 
+//WRIGTHSTREAM
+app.use('/purchases', require('./routes/workstream/purchases'))
+app.use('/purchases_statuses', require('./routes/workstream/purchases_statuses'))
+app.use('/purchases_items', require('./routes/workstream/purchases_items'))
+app.use('/purchases_bundles', require('./routes/workstream/purchases_bundles'))
+app.use('/comments', require('./routes/workstream/comments'))
+app.use('/priority', require('./routes/workstream/priority'))
+
 //ADMIN
 app.use('/admin_staff', require('./routes/admin/staff'))
 app.use('/admin_products', require('./routes/admin/products'))
