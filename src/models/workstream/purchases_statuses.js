@@ -56,20 +56,12 @@ function updatePurchaseStatus(purchase_id, status_id, priority, completed, staff
 ////////////////////////////////////////////////////////////////////////////////
 
 const updateStock = async function(purchase_id) {
-  let neededItems = []
-  let neededBundles = []
-  return updateItems(purchase_id)
-  .then(items => {
-    neededItems = items
-    return updateBundles(purchase_id)
-  })
-  .then(bundles => {
-    neededBundles = bundles
-    return helperModel.orderPredictor({neededItems, neededBundles})
-  })
-  .then(async function(suppliesList){
-    return updateSupply(suppliesList)
-  })
+  const purchase = await knex('purchases').where({id: purchase_id}).first()
+  let compare = false
+  const items = await updateItems(purchase_id)
+  const bundles = await updateBundles(purchase_id)
+  const suppliesList = await helperModel.orderPredictor(purchase.shop_id, {items, bundles, compare})
+  return updateSupply(suppliesList)
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -86,6 +78,7 @@ const updateSupply = async function(suppliesList){
   //MAPPING OVER AND MATCHING SUPPLIES
   let bundlePromiseArray = []
   for(const supply of suppliesList){
+    console.log(supply);
   const matchedSupply = dbSupplies.find(ele => ele.id === supply.supply_id)
   let newMeasureType;
   let newSupplyStock;
@@ -145,7 +138,7 @@ const updateBundles = async function(purchase_id){
     const matchedBundle = bundles.find(ele => ele.id === bundle.bundle_id)
     if(bundle.bundle_qty >= parseInt(matchedBundle.stock_qty)){
       const updatedBundleStock = knex('bundles').where({id: matchedBundle.id}).update({stock_qty: 0})
-      leftBundles.id = bundle.bundle_id
+      leftBundles.bundle_id = bundle.bundle_id
       leftBundles.bundle_qty = bundle.bundle_qty - parseInt(matchedBundle.stock_qty)
       neededBundles.push(leftBundles)
       bundlePromiseArray.push(updatedBundleStock)
