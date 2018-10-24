@@ -2,28 +2,13 @@ const knex = require('../../../db')
 const convert = require('convert-units')
 
 function wrightStream(shop_id) {
-  return (knex('purchases')
-  .where({shop_id: shop_id})
-  .select('id', 'store_id'))
-  .then(purchases => {
+  return (knex('purchases').where({shop_id: shop_id}).select('id', 'store_id')).then(purchases => {
     const purchasePromise = purchases.map(purchase => {
-      return knex('purchases_items')
-      .innerJoin('items', 'purchases_items.item_id', 'items.id')
-      .innerJoin('purchases_statuses', 'purchases_items.purchase_id', 'purchases_statuses.purchase_id')
-      .select('purchases_items.item_id', 'purchases_items.item_qty', 'items.name')
-      .where({'purchases_items.purchase_id': purchase.id})
-      .andWhere({'purchases_statuses.purchase_id': purchase.id, 'status_id': 1, 'purchases_statuses.completed': false})
-      .then(items => {
+      return knex('purchases_items').innerJoin('items', 'purchases_items.item_id', 'items.id').innerJoin('purchases_statuses', 'purchases_items.purchase_id', 'purchases_statuses.purchase_id').select('purchases_items.item_id', 'purchases_items.item_qty', 'items.name').where({'purchases_items.purchase_id': purchase.id}).andWhere({'purchases_statuses.purchase_id': purchase.id, 'status_id': 1, 'purchases_statuses.completed': false}).then(items => {
         purchase.items = items
         return purchase
       }).then(bundles => {
-        return knex('purchases_bundles')
-        .innerJoin('bundles', 'bundles.id', 'purchases_bundles.bundle_id')
-        .innerJoin('purchases_statuses', 'purchases_bundles.purchase_id', 'purchases_statuses.purchase_id')
-        .select('bundle_id', 'bundle_qty', 'bundles.name')
-        .where({'purchases_bundles.purchase_id': purchase.id})
-        .andWhere({'purchases_statuses.purchase_id': purchase.id, 'status_id': 1, 'purchases_statuses.completed': false})
-        .then(bundlesList => {
+        return knex('purchases_bundles').innerJoin('bundles', 'bundles.id', 'purchases_bundles.bundle_id').innerJoin('purchases_statuses', 'purchases_bundles.purchase_id', 'purchases_statuses.purchase_id').select('bundle_id', 'bundle_qty', 'bundles.name').where({'purchases_bundles.purchase_id': purchase.id}).andWhere({'purchases_statuses.purchase_id': purchase.id, 'status_id': 1, 'purchases_statuses.completed': false}).then(bundlesList => {
           purchase.bundles = bundlesList
           return purchase
         })
@@ -35,12 +20,65 @@ function wrightStream(shop_id) {
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////
+//////// Inventory analyzer
+//////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////
+
+const inventoryAnalyzer = async (backlog, currentInventory, currentProducts) => {
+  if (backlog.length === 0) return backlog
+  for (let i = 0; i < backlog.length; i++) {
+    const purchase_items = await knex('purchases_items').where({purchase_id: backlog[i]}).select('item_id', 'item_qty')
+    const purchase_bundles = await knex('purchases_bundles').where({purchase_id: backlog[i]}).select('bundle_id', 'bundle_qty')
+
+
+    const itemsMatched = purchase_items.map(item => {
+      const itemMatch = currentProducts.items.find(function(itemsList) {
+        return itemsList.id === item.item_id;
+      })
+      if(itemMatch.stock_qty > item.item_qty) {
+
+        console.log("larger");
+      }
+      else if(itemMatch.stock_qty < item.item_qty) {
+        console.log("smaller");
+      }
+      return itemMatch
+    })
+
+    const bundlesMatched = purchase_bundles.map(bundle => {
+      const bundleMatch = currentProducts.bundles.find(function(bundlesList) {
+        return bundlesList.id === bundle.bundle_id;
+      })
+      if(bundleMatch.stock_qty > bundle.bundle_qty) {
+        console.log("larger");
+      }
+      else if(bundleMatch.stock_qty < bundle.bundle_qty) {
+        console.log("smaller");
+      }
+      return bundleMatch
+    })
+
+    if(purchase_items.item_qty === 0 && purchase_bundles.bundle_qty === 0){
+      const purchase_supplies = await knex('purchases_supplies').where({purchase_id: backlog[i]}).update({completed: true})
+      console.log(purchase_supplies);
+    }
+    else {
+      console.log(purchase_items, purchase_bundles, "need to check supplies list");
+    }
+  }
+  return backlog
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////
 ////////Predictor Routes
 //////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////
 
-const orderPredictor = async(shop_id, body) => {
-  body.compare === true ? body.compare = true : body.compare = false
+const orderPredictor = async (shop_id, body) => {
+  body.compare === true
+    ? body.compare = true
+    : body.compare = false
   const items = body.items || null
   const bundles = body.bundles || null
   let empty = []
@@ -52,40 +90,35 @@ const orderPredictor = async(shop_id, body) => {
     return Promise.resolve(empty)
   }
 
-  if(items){
+  if (items) {
     const items_supplies = await itemSupplies(items)
     items_completed = await createItemsList(items_supplies)
   }
-  if(bundles){
+  if (bundles) {
     const bundle_items = await bundleItems(bundles)
     const bundle_supplies = await bundleSupplies(bundle_items, bundles)
     bundles_completed = await createBundleSuppliesList(bundle_supplies)
   }
-  if(items_completed && bundles_completed) {
+  if (items_completed && bundles_completed) {
     combined_supplies = await combine(items_completed, bundles_completed)
   }
   if (body.compare === true) {
     if (combined_supplies) {
       let supplies_compared = await supplyCompare(combined_supplies, shop_id)
       return orderData(supplies_compared)
-    }
-    else if (items_completed && !bundles_completed){
+    } else if (items_completed && !bundles_completed) {
       let supplies_compared = await supplyCompare(items_completed, shop_id)
       return orderData(supplies_compared)
-    }
-    else if (!items_completed && bundles_completed) {
+    } else if (!items_completed && bundles_completed) {
       let supplies_compared = await supplyCompare(bundles_completed, shop_id)
       return orderData(supplies_compared)
     }
-  }
-  else if (body.compare === false) {
+  } else if (body.compare === false) {
     if (combined_supplies) {
       return orderData(combined_supplies)
-    }
-    else if (items_completed && !bundles_completed){
+    } else if (items_completed && !bundles_completed) {
       return orderData(items_completed)
-    }
-    else if (!items_completed && bundles_completed) {
+    } else if (!items_completed && bundles_completed) {
       return orderData(bundles_completed)
     }
   }
@@ -97,16 +130,9 @@ const orderPredictor = async(shop_id, body) => {
 
 function itemSupplies(items) {
   const itemsArray = items.map(item => {
-    return knex('items')
-    .where({id: item.id})
-    .select('items.id', 'items.name')
-    .then(products => {
+    return knex('items').where({id: item.id}).select('items.id', 'items.name').then(products => {
       const promises = products.map(product => {
-        return knex('items_supplies')
-        .join('supplies', 'supplies.id', 'items_supplies.supplies_id')
-        .where('items_supplies.item_id', product.id)
-        .select('items_supplies.supply_qty', 'items_supplies.measure_unit', 'supplies.measure_type', 'supplies.name', 'supplies.id')
-        .then(supplies => {
+        return knex('items_supplies').join('supplies', 'supplies.id', 'items_supplies.supplies_id').where('items_supplies.item_id', product.id).select('items_supplies.supply_qty', 'items_supplies.measure_unit', 'supplies.measure_type', 'supplies.name', 'supplies.id').then(supplies => {
           product.supply = supplies.map(ele => ({
             ...ele,
             item_qty: items.find(ele => ele.id === product.id).item_qty
@@ -121,10 +147,13 @@ function itemSupplies(items) {
 }
 
 function createItemsList(supplies_list) {
-  return supplies_list.reduce((acc, ele) => [...acc,...ele])
-  .map(supply => supply.supply)
-  .reduce((acc, ele) => [...acc,...ele])
-  .reduce((acc, ele) => {
+  return supplies_list.reduce((acc, ele) => [
+    ...acc,
+    ...ele
+  ]).map(supply => supply.supply).reduce((acc, ele) => [
+    ...acc,
+    ...ele
+  ]).reduce((acc, ele) => {
     if (acc.hasOwnProperty(ele.id)) {
       let measure_type;
       let newSuppliesNeeded = ele.supply_qty * ele.item_qty
@@ -167,16 +196,9 @@ function createItemsList(supplies_list) {
 function bundleItems(bundles) {
   const bundles_array = bundles.map(bundle => {
     const bundle_id = bundle.id || bundle.bundle_id
-    return knex('bundles')
-    .where({id: bundle_id})
-    .select('bundles.id', 'bundles.name')
-    .then(packages => {
+    return knex('bundles').where({id: bundle_id}).select('bundles.id', 'bundles.name').then(packages => {
       const promises = packages.map(package => {
-        return knex('bundles_items')
-        .join('items', 'items.id', 'bundles_items.item_id')
-        .where('bundles_items.bundle_id', package.id)
-        .select('stock_qty', 'name', 'item_id', 'item_qty', 'bundle_id')
-        .then(items => {
+        return knex('bundles_items').join('items', 'items.id', 'bundles_items.item_id').where('bundles_items.bundle_id', package.id).select('stock_qty', 'name', 'item_id', 'item_qty', 'bundle_id').then(items => {
           package.item = items
           return package
         })
@@ -193,9 +215,7 @@ function bundleItems(bundles) {
 }
 
 function createBundleSuppliesList(bundle_supplies) {
-  return bundle_supplies
-  .map(supply => supply.supply)
-  .reduce((acc, ele) => [
+  return bundle_supplies.map(supply => supply.supply).reduce((acc, ele) => [
     ...acc,
     ...ele
   ]).reduce((acc, ele) => {
@@ -235,26 +255,18 @@ function createBundleSuppliesList(bundle_supplies) {
 }
 
 function bundleSupplies(bundleItems, bundles) {
-  let bundledItems = bundleItems
-    .map(ele => ele.item)
-    .reduce((acc, ele) => [
+  let bundledItems = bundleItems.map(ele => ele.item).reduce((acc, ele) => [
     ...acc,
     ...ele
   ])
-  return Promise.resolve(bundledItems)
-  .then(items => {
+  return Promise.resolve(bundledItems).then(items => {
     const promises = items.map(item => {
-      return knex('items_supplies')
-      .join('supplies', 'supplies.id', 'items_supplies.supplies_id')
-      .where('items_supplies.item_id', item.item_id)
-      .select('items_supplies.supply_qty', 'items_supplies.measure_unit', 'supplies.measure_type', 'supplies.name', 'supplies.id')
-      .then(supplies => {
+      return knex('items_supplies').join('supplies', 'supplies.id', 'items_supplies.supplies_id').where('items_supplies.item_id', item.item_id).select('items_supplies.supply_qty', 'items_supplies.measure_unit', 'supplies.measure_type', 'supplies.name', 'supplies.id').then(supplies => {
         item.supply = supplies.map(ele => ({
           ...ele,
           item_qty: items.find(ele => ele.item_id === item.item_id).item_qty,
           bundle_qty: bundles.find(ele => ele.id === bundles.bundle_id).bundle_qty
-        }
-      ))
+        }))
         return item
       })
     })
@@ -266,8 +278,7 @@ function bundleSupplies(bundleItems, bundles) {
 ///////////////////////////////////////////Compare and Combine////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-const supplyCompare = async function(addedSupply, shopId){
+const supplyCompare = async function(addedSupply, shopId) {
   // console.log(typeof addedSupply["1"], addedSupply["1"]);
   // const newDBSupplies = await Promise.all(addedSupply.map(supply => {
   //   return knex('supplies')
@@ -315,9 +326,8 @@ const supplyCompare = async function(addedSupply, shopId){
   // bundlePromiseArray.push(updateSupplyArray)
   // }
   // Promise.all(bundlePromiseArray)
-    return addedSupply
+  return addedSupply
 }
-
 
 function combine(lists, comBunSupp) {
   let items = lists
@@ -341,7 +351,6 @@ function combine(lists, comBunSupp) {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////Clean up code and send it//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 
 function orderData(addedSupplies) {
   let supplies = []
@@ -368,6 +377,7 @@ function orderData(addedSupplies) {
 }
 
 module.exports = {
+  inventoryAnalyzer,
   wrightStream,
   orderPredictor
 }

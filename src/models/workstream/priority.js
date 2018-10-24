@@ -1,5 +1,6 @@
 const knex = require('../../../db')
-
+const inventory = require('../inventory/inventory')
+const helper = require('../helper/measurement')
 function getAllPriority(shop_id) {
   return (knex('priority').where({shop_id: shop_id}))
 }
@@ -39,8 +40,14 @@ const updatePriority = async(shop_id, body) => {
 }
 
 const inventoryChecker = async(shop_id) => {
-  console.log("in inventoryChecker");
-  return shop_id
+  const priority = await knex('priority').where({shop_id: shop_id}).first()
+  let backlog = priority.backlog
+  backlog = JSON.parse(backlog)
+  const currentInventory = await inventory.getAllInventorySupplies(shop_id)
+  const currentProducts = await inventory.getAllInventoryProducts(shop_id)
+  const analyzer = await helper.inventoryAnalyzer(backlog, currentInventory, currentProducts)
+
+  return analyzer
 }
 
 module.exports = {
