@@ -164,6 +164,7 @@ function removeStaff(staff_id) {
 }
 
 module.exports = {
+  getShopByName,
   getAllShops,
   getOneShop,
   createShop,

@@ -11,10 +11,10 @@ function login(req, res, next){
   if(!req.body.password){
     return next({ status: 400, message: 'Bad request'})
   }
-  authModel.login(req.body.email, req.body.password)
-  .then(function({id, email, first_name, last_name, photo, shops_id, role_id }){
-    const token = jwt.sign({ id, email, first_name, last_name, photo, shops_id, role_id }, process.env.SECRET)
-    return res.status(200).send({ token })
+  authModel.login(req.body.shop_username, req.body.email, req.body.password)
+  .then(({id, email, first_name, last_name, photo, shop_id, role_id}) => {
+    const token = jwt.sign({id, email, first_name, last_name, photo, shop_id, role_id}, process.env.SECRET)
+    return res.status(200).send({token})
   })
   .catch(next)
 }
@@ -31,7 +31,7 @@ function isAuthenticated(req, res, next){
     return next({ status: 401, message: 'Unauthorized' })
   }
   const [scheme, credentials] = req.headers.authorization.split(' ')
-  jwt.verify(credentials, process.env.SECRET, (err, payload)=>{
+  jwt.verify(credentials, process.env.SECRET, (err, payload) => {
     if(err){
       return next({ status: 401, message: 'Unauthorized' })
     }
