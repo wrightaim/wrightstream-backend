@@ -78,7 +78,6 @@ const updateSupply = async function(suppliesList){
   //MAPPING OVER AND MATCHING SUPPLIES
   let bundlePromiseArray = []
   for(const supply of suppliesList){
-    console.log(supply);
   const matchedSupply = dbSupplies.find(ele => ele.id === supply.supply_id)
   let newMeasureType;
   let newSupplyStock;
@@ -89,19 +88,19 @@ const updateSupply = async function(suppliesList){
   }
   else if (matchedSupply.measure_type === 'volume'){
     newMeasureType = 'tsp'
-    matchedSupply.stock_qty = convert(parseInt(matchedSupply.stock_qty)).from(matchedSupply.stock_qty_measure_type).to('tsp')
+    matchedSupply.stock_qty = convert(parseInt(matchedSupply.stock_qty)).from(matchedSupply.measure_unit).to('tsp')
     supply.supply_qty = convert(supply.supply_qty).from(supply.supply_measure_type).to('tsp')
     newSupplyStock = parseInt(matchedSupply.stock_qty) - supply.supply_qty
   }
   else if (matchedSupply.measure_type === 'length'){
     newMeasureType = 'ft'
-    matchedSupply.stock_qty = convert(parseInt(matchedSupply.stock_qty)).from(matchedSupply.stock_qty_measure_type).to('ft')
+    matchedSupply.stock_qty = convert(parseInt(matchedSupply.stock_qty)).from(matchedSupply.measure_unit).to('ft')
     supply.supply_qty = convert(supply.supply_qty).from(supply.supply_measure_type).to('ft')
     newSupplyStock = parseInt(matchedSupply.stock_qty) - supply.supply_qty
   }
   else if (matchedSupply.measure_type === 'mass'){
     newMeasureType = 'oz'
-    matchedSupply.stock_qty = convert(parseInt(matchedSupply.stock_qty)).from(matchedSupply.stock_qty_measure_type).to('oz')
+    matchedSupply.stock_qty = convert(parseInt(matchedSupply.stock_qty)).from(matchedSupply.measure_unit).to('oz')
     supply.supply_qty = convert(supply.supply_qty).from(supply.supply_measure_type).to('oz')
     newSupplyStock = parseInt(matchedSupply.stock_qty) - supply.supply_qty
   }
@@ -113,7 +112,7 @@ const updateSupply = async function(suppliesList){
     newMeasureType = convertedSupplies.unit
     newSupplyStock = Number(convertedSupplies.val)
   }
-  const updateSupplyArray = knex('supplies').where({id: matchedSupply.id}).update({stock_qty: newSupplyStock, stock_qty_measure_type: newMeasureType})
+  const updateSupplyArray = knex('supplies').where({id: matchedSupply.id}).update({stock_qty: newSupplyStock, measure_unit: newMeasureType})
   bundlePromiseArray.push(updateSupplyArray)
   }
   Promise.all(bundlePromiseArray)

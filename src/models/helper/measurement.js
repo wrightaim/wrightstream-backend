@@ -30,13 +30,9 @@ const inventoryAnalyzer = async (backlog, currentInventory, currentProducts) => 
     const purchase_items = await knex('purchases_items').where({purchase_id: backlog[i]}).select('item_id', 'item_qty')
     const purchase_bundles = await knex('purchases_bundles').where({purchase_id: backlog[i]}).select('bundle_id', 'bundle_qty')
 
-
     const itemsMatched = purchase_items.map(item => {
-      const itemMatch = currentProducts.items.find(function(itemsList) {
-        return itemsList.id === item.item_id;
-      })
+      const itemMatch = currentProducts.items.find(itemsList => itemsList.id === item.item_id)
       if(itemMatch.stock_qty > item.item_qty) {
-
         console.log("larger");
       }
       else if(itemMatch.stock_qty < item.item_qty) {
@@ -46,9 +42,7 @@ const inventoryAnalyzer = async (backlog, currentInventory, currentProducts) => 
     })
 
     const bundlesMatched = purchase_bundles.map(bundle => {
-      const bundleMatch = currentProducts.bundles.find(function(bundlesList) {
-        return bundlesList.id === bundle.bundle_id;
-      })
+      const bundleMatch = currentProducts.bundles.find(bundlesList => bundlesList.id === bundle.bundle_id)
       if(bundleMatch.stock_qty > bundle.bundle_qty) {
         console.log("larger");
       }
@@ -57,12 +51,13 @@ const inventoryAnalyzer = async (backlog, currentInventory, currentProducts) => 
       }
       return bundleMatch
     })
-
+//need to map over all quantities to evaluate below
     if(purchase_items.item_qty === 0 && purchase_bundles.bundle_qty === 0){
       const purchase_supplies = await knex('purchases_supplies').where({purchase_id: backlog[i]}).update({completed: true})
       console.log(purchase_supplies);
     }
     else {
+      //start with supplies and then one by one update them
       console.log(purchase_items, purchase_bundles, "need to check supplies list");
     }
   }
@@ -90,11 +85,11 @@ const orderPredictor = async (shop_id, body) => {
     return Promise.resolve(empty)
   }
 
-  if (items) {
+  if (items.length > 0) {
     const items_supplies = await itemSupplies(items)
     items_completed = await createItemsList(items_supplies)
   }
-  if (bundles) {
+  if (bundles.length > 0) {
     const bundle_items = await bundleItems(bundles)
     const bundle_supplies = await bundleSupplies(bundle_items, bundles)
     bundles_completed = await createBundleSuppliesList(bundle_supplies)
@@ -147,6 +142,7 @@ function itemSupplies(items) {
 }
 
 function createItemsList(supplies_list) {
+  console.log(supplies_list);
   return supplies_list.reduce((acc, ele) => [
     ...acc,
     ...ele
