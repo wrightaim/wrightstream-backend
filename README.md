@@ -1,4 +1,4 @@
-# WrightStream BackEnd - 2
+# WrightStream Back-End
 Deployed version: http://wrightstream.com/
 Back-end for https://github.com/wrightaim/wrightstream
 
