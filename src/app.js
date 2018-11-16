@@ -42,6 +42,7 @@ app.use('/purchases_items', require('./routes/workstream/purchases_items'))
 app.use('/purchases_bundles', require('./routes/workstream/purchases_bundles'))
 app.use('/comments', require('./routes/workstream/comments'))
 app.use('/priority', require('./routes/workstream/priority'))
+app.use('/recraft', require('./routes/workstream/recraft'))
 
 //ADMIN
 app.use('/admin_staff', require('./routes/admin/staff'))
