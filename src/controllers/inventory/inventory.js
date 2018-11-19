@@ -18,8 +18,18 @@ function getAllInventoryProducts(req, res, next) {
   }).catch(next)
 }
 
+function createFullProducts (req, res, next) {
+  if(!req.params.shop_id) {
+    return next ({status: 400, message: "No shop specified"})
+  }
+  inventoryModel.createFullProducts(req.shop_id, req.body)
+  .then(data => {
+    res.status(200).send({data})
+  }).catch(next)
+}
 
 module.exports = {
   getAllInventorySupplies,
-  getAllInventoryProducts
+  getAllInventoryProducts,
+  createFullProducts
 }

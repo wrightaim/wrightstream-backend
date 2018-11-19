@@ -34,10 +34,20 @@ function orderPredictor(req, res, next) {
   }).catch(next)
 }
 
+function suppliesPredictor(req, res, next) {
+  if (!req.body || !req.params.shop_id) {
+    return next({status: 400, message: "Need proper supplies inputs"})
+  }
+  helperModel.suppliesPredictor(req.params.shop_id, req.body).then(data => {
+    res.status(201).send({data})
+  }).catch(next)
+}
+
 module.exports = {
   volume,
   length,
   mass,
   wrightStream,
-  orderPredictor
+  orderPredictor,
+  suppliesPredictor
 }

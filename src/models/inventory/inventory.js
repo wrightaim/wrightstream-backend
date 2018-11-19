@@ -1,4 +1,5 @@
 const knex = require('../../../db')
+const helperModel = require('../../models/helper/measurement')
 
 function getAllInventorySupplies(shop_id) {
   return knex('supplies')
@@ -23,7 +24,12 @@ function getAllInventoryProducts(shop_id) {
   })
 }
 
+function createFullProducts(shop_id, body) {
+  return shop_id
+}
+
 module.exports = {
   getAllInventorySupplies,
-  getAllInventoryProducts
+  getAllInventoryProducts,
+  createFullProducts
 }

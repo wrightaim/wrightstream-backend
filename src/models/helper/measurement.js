@@ -33,10 +33,10 @@ const inventoryAnalyzer = async (backlog, currentInventory, currentProducts) => 
     const itemsMatched = purchase_items.map(item => {
       const itemMatch = currentProducts.items.find(itemsList => itemsList.id === item.item_id)
       if(itemMatch.stock_qty > item.item_qty) {
-        console.log("larger");
+        console.log("larger and need to take from supplies");
       }
       else if(itemMatch.stock_qty < item.item_qty) {
-        console.log("smaller");
+        console.log("smaller and can just remove from current inventory and move on");
       }
       return itemMatch
     })
@@ -44,10 +44,10 @@ const inventoryAnalyzer = async (backlog, currentInventory, currentProducts) => 
     const bundlesMatched = purchase_bundles.map(bundle => {
       const bundleMatch = currentProducts.bundles.find(bundlesList => bundlesList.id === bundle.bundle_id)
       if(bundleMatch.stock_qty > bundle.bundle_qty) {
-        console.log("larger");
+        console.log("larger and need to take from supplies");
       }
       else if(bundleMatch.stock_qty < bundle.bundle_qty) {
-        console.log("smaller");
+        console.log("smaller and can just remove from current inventory and move on");
       }
       return bundleMatch
     })
@@ -117,6 +117,11 @@ const orderPredictor = async (shop_id, body) => {
       return orderData(bundles_completed)
     }
   }
+}
+
+const suppliesPredictor = async (shop_id, body) => {
+  console.log(body, shop_id);
+  return shop_id
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -375,5 +380,6 @@ function orderData(addedSupplies) {
 module.exports = {
   inventoryAnalyzer,
   wrightStream,
-  orderPredictor
+  orderPredictor,
+  suppliesPredictor
 }
