@@ -15,11 +15,12 @@ function getAllShops() {
 
 function createShop(body) {
   let shop_name = body.shop_name
-  let main_name = body.name
+  let name = body.shop_username
+  let email = body.shop_email
   let logo = body.logo
     ? body.logo
     : null
-  return getShopByName(main_name)
+  return getShopByName(name)
   .then(data => {
     if (data)
       throw {
@@ -27,7 +28,7 @@ function createShop(body) {
         message: 'Shop name exists'
       }
     return (knex('shops')
-    .insert({shop_name: shop_name, name: main_name, email: body.email, logo})
+    .insert({shop_name, name, email, logo})
     .returning('*'))
   })
   .then(new_shop => {
