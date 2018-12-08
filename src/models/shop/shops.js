@@ -78,7 +78,7 @@ const updateShop = async (shop_id, name, shop_name, email, logo) => {
   shop_name
     ? toUpdate.shop_name = shop_name
     : null
-  logo
+  logo || logo === null
     ? toUpdate.logo = logo
     : null
   email
