@@ -5,6 +5,10 @@ function getShopByName(name) {
   return (knex('shops').where({name: name}).first())
 }
 
+function getShopByEmail(email) {
+  return (knex('shops').where({email: email}).first())
+}
+
 function getOneShop(shop_id) {
   return (knex('shops').where({id: shop_id}).first())
 }
@@ -27,9 +31,17 @@ function createShop(body) {
         status : 400,
         message: 'Shop name exists'
       }
-    return (knex('shops')
-    .insert({shop_name, name, email, logo})
-    .returning('*'))
+    return getShopByEmail(email)
+    .then(data => {
+      if (data)
+        throw {
+          status : 400,
+          message: 'Email exists'
+        }
+        return (knex('shops')
+        .insert({shop_name, name, email, logo})
+        .returning('*'))
+    })
   })
   .then(new_shop => {
     return (knex('priority').insert({shop_id: new_shop[0].id}).returning('*'))
@@ -40,11 +52,22 @@ function createShop(body) {
 
 const updateShop = async (shop_id, name, shop_name, email, logo) => {
   if (name) {
+    const checkOldName = await getOneShop(shop_id)
     const checkMainName = await getShopByName(name)
-    if (typeof checkMainName === 'object') {
+    if (typeof checkMainName === 'object' && checkOldName.name !== name) {
       throw {
         status : 400,
         message: 'Shop name exists'
+      }
+    }
+  }
+  if (email) {
+    const checkOldEmail = await getOneShop(shop_id)
+    const checkMainEmail = await getShopByEmail(email)
+    if (typeof checkMainEmail === 'object' && checkOldEmail.email !== email) {
+      throw {
+        status : 400,
+        message: 'Email exists'
       }
     }
   }
