@@ -3,6 +3,8 @@ exports.up = function(knex, Promise) {
     table.increments();
     table.string('name').notNullable().unique();
     table.string('logo').notNullable();
+    table.string('color').notNullable();
+    table.string('url').notNullable();
   });
 };
 
