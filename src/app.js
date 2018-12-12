@@ -18,6 +18,7 @@ app.use(bodyParser.json())
 //AUTH AND SHOP ROUTES
 app.use('/shops', require('./routes/shop/shops'))
 app.use('/auth', require('./routes/shop/auth'))
+app.use('/platforms', require('./routes/shop/platforms'))
 app.use('/auth/etsy', require('./routes/shop/authEtsy'))
 app.use('/etsy', require('./routes/shop/etsy'))
 app.use('/stores', require('./routes/shop/stores'))

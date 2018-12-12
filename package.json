@@ -10,7 +10,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "latest": "knex migrate:latest",
     "rollback": "knex migrate:rollback",
-    "seed": "knex seed:run"
+    "seed": "knex seed:run",
+    "reboot": "knex migrate:rollback && knex migrate:latest && knex seed:run"
   },
   "repository": {
     "type": "git",
