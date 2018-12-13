@@ -18,6 +18,7 @@ app.use(bodyParser.json())
 //AUTH AND SHOP ROUTES
 app.use('/shops', require('./routes/shop/shops'))
 app.use('/auth', require('./routes/shop/auth'))
+app.use('/roles', require('./routes/shop/roles'))
 app.use('/platforms', require('./routes/shop/platforms'))
 app.use('/auth/etsy', require('./routes/shop/authEtsy'))
 app.use('/etsy', require('./routes/shop/etsy'))
@@ -36,7 +37,7 @@ app.use('/bundles', require('./routes/products/bundles'))
 //MEASUREMENTS
 app.use('/helper', require('./routes/helper/measurement'))
 
-//WRIGTHSTREAM
+//WORKSTREAM
 app.use('/purchases', require('./routes/workstream/purchases'))
 app.use('/purchases_statuses', require('./routes/workstream/purchases_statuses'))
 app.use('/purchases_items', require('./routes/workstream/purchases_items'))
