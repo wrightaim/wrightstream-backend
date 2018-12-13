@@ -2,8 +2,8 @@ exports.seed = function(knex, Promise) {
   return knex('platforms').del()
     .then(function () {
       return knex('platforms').insert([
-        { id: 1, name: 'Etsy', logo: 'https://cdn.freebiesupply.com/logos/large/2x/etsy-logo-black-and-white.png', color: '#f27223', url: 'https://www.etsy.com'},
-        { id: 2, name: 'Shopify', logo: 'https://bondconsultingservices.com/wp-content/uploads/2017/09/shopify-logo.png', color: '#f7f7f7', url: 'https://www.shopify.com'}
+        {id: 1, name: 'Etsy', logo: 'https://www.shareicon.net/data/2016/07/16/796799_logo_512x512.png', color: '#f27223', url: 'https://www.etsy.com'},
+        {id: 2, name: 'Shopify', logo: 'https://rewind.io/wp-content/uploads/2018/08/shopify-icon-optimized.png', color: '#8cbb36', url: 'https://www.shopify.com'}
       ]);
     })
     .then(() => {
