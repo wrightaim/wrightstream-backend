@@ -10,9 +10,9 @@ exports.seed = function(knex, Promise) {
       { id: 7, shop_id: 1, name: 'Brownies'},
       { id: 8, shop_id: 2, name: 'Scarves'},
       { id: 9, shop_id: 2, name: 'Blankets'},
-      { id: 10, shop_id: 2, name: 'Mittens' },
+      { id: 10, shop_id: 2, name: 'Cardigans' },
       { id: 11, shop_id: 2, name: 'Hats' },
-      { id: 12, shop_id: 2, name: 'Raw Yarns' },
+      { id: 12, shop_id: 2, name: 'Mittens' },
       { id: 13, shop_id: 2, name: 'Sweaters' }
     ])
   })
