@@ -114,8 +114,9 @@ function getAllStaff(shop_id) {
   return (knex('staff').where({shop_id: shop_id}))
 }
 
-function createStaff(body, shop_id) {
-  let role = body.role || 1
+function createStaff (body, shop_id) {
+  console.log(body, shop_id)
+  let role_id = body.role_id || 1
   return getStaffByEmail(body.email, shop_id).then(data => {
     if (data)
       throw {
@@ -126,7 +127,7 @@ function createStaff(body, shop_id) {
   }).then(new_password => {
     return (knex('staff').insert({
       shop_id: shop_id,
-      role_id: role,
+      role_id: role_id,
       first_name: body.first_name,
       last_name: body.last_name,
       email: body.email,
