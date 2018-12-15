@@ -115,7 +115,6 @@ function getAllStaff(shop_id) {
 }
 
 function createStaff (body, shop_id) {
-  console.log(body, shop_id)
   let role_id = body.role_id || 1
   return getStaffByEmail(body.email, shop_id).then(data => {
     if (data)
@@ -144,10 +143,11 @@ function createStaff (body, shop_id) {
   })
 }
 
-const updateStaff = async (shop_id, staff_id, first_name, last_name, unhashed_password, email, photo, role, archived) => {
+const updateStaff = async (shop_id, staff_id, first_name, last_name, unhashed_password, email, photo, role_id, archived) => {
   if (email) {
-    const checkEmail = await getStaffByEmail(email, shop_id)
-    if (typeof checkEmail === 'object') {
+    const checkOldEmail = await getOneStaff(staff_id, shop_id)
+    const checkMainEmail = await getStaffByEmail(email, shop_id)
+    if (typeof checkMainEmail === 'object' && checkOldEmail.email !== email) {
       throw {
         status : 400,
         message: 'Staff email exists'
@@ -167,15 +167,19 @@ const updateStaff = async (shop_id, staff_id, first_name, last_name, unhashed_pa
   photo
     ? toUpdate.photo = photo
     : null
-  role
-    ? toUpdate.role = role
+  role_id
+    ? toUpdate.role_id = role_id
     : null
   archived || archived === false
     ? toUpdate.archived = archived
     : null
-  return bcrypt.hash(unhashed_password, 10).then(password => {
-    return (knex('staff').update(toUpdate).where({id: staff_id}).returning('*'))
-  }).then(function([
+  const password = await bcrypt.hash(unhashed_password, 10)
+  unhashed_password
+    ? toUpdate.password = password
+    : null
+
+  return (knex('staff').update(toUpdate).where({id: staff_id}).returning('*'))
+  .then(function([
     {
       password,
       ...data
