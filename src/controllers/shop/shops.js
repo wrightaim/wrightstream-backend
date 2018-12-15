@@ -28,7 +28,7 @@ function createShop(req, res, next) {
 }
 
 function updateShop(req, res, next) {
-  shopModel.updateShop(parseInt(req.params.shop_id), req.body.name, req.body.shop_name, req.body.email, req.body.logo)
+  shopModel.updateShop(parseInt(req.params.shop_id), req.body.name, req.body.shop_name, req.body.email, req.body.logo, req.body.archived)
   .then(data => {
     res.status(200).send({ data });
   })

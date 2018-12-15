@@ -5,6 +5,7 @@ exports.up = function(knex, Promise) {
     table.string('shop_name').notNullable();
     table.string('email').notNullable().unique();
     table.string('logo').defaultsTo(null);
+    table.boolean('archived').defaultsTo(false);
     table.timestamp('created_at').defaultTo(knex.fn.now());
   });
 };
