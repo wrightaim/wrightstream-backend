@@ -6,6 +6,7 @@ function login(shop_username, email, password){
   let staff
   return shopModel.getShopByName(shop_username)
   .then(response => {
+    if (response.archived) throw { status: 400, message: "Bad Request" }
     return shopModel.getStaffByEmail(email, response.id)
     .then(data => {
       if (!data) throw { status: 400, message: "Bad Request" }
