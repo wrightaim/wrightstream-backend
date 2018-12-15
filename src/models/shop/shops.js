@@ -50,7 +50,7 @@ function createShop(body) {
   })
 }
 
-const updateShop = async (shop_id, name, shop_name, email, logo) => {
+const updateShop = async (shop_id, name, shop_name, email, logo, archived) => {
   if (name) {
     const checkOldName = await getOneShop(shop_id)
     const checkMainName = await getShopByName(name)
@@ -78,11 +78,14 @@ const updateShop = async (shop_id, name, shop_name, email, logo) => {
   shop_name
     ? toUpdate.shop_name = shop_name
     : null
+  email
+    ? toUpdate.email = email
+    : null
   logo || logo === null
     ? toUpdate.logo = logo
     : null
-  email
-    ? toUpdate.email = email
+  archived || archived === false
+    ? toUpdate.archived = archived
     : null
   return (knex('shops').update(toUpdate).where({id: shop_id}).returning('*'))
 }
@@ -141,10 +144,8 @@ function createStaff(body, shop_id) {
 }
 
 const updateStaff = async (shop_id, staff_id, first_name, last_name, unhashed_password, email, photo, role, archived) => {
-  console.log(shop_id, staff_id, first_name, last_name, unhashed_password, email, photo, role, archived);
   if (email) {
     const checkEmail = await getStaffByEmail(email, shop_id)
-    console.log(checkEmail);
     if (typeof checkEmail === 'object') {
       throw {
         status : 400,

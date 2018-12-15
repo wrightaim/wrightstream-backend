@@ -7,8 +7,8 @@ exports.up = function(knex, Promise) {
     table.string('last_name').notNullable();
     table.string('email').notNullable();
     table.string('password').notNullable();
-    table.boolean('archived').defaultsTo(false);
     table.string('photo').defaultsTo('');
+    table.boolean('archived').defaultsTo(false);
     table.timestamp('created_at').defaultTo(knex.fn.now());
   });
 };
