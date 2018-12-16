@@ -164,7 +164,7 @@ const updateStaff = async (shop_id, staff_id, first_name, last_name, unhashed_pa
   email
     ? toUpdate.email = email
     : null
-  photo
+  photo || photo === ''
     ? toUpdate.photo = photo
     : null
   role_id
