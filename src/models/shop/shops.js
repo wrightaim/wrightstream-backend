@@ -173,11 +173,9 @@ const updateStaff = async (shop_id, staff_id, first_name, last_name, unhashed_pa
   archived || archived === false
     ? toUpdate.archived = archived
     : null
-  const password = await bcrypt.hash(unhashed_password, 10)
   unhashed_password
-    ? toUpdate.password = password
-    : null
-
+    ? toUpdate.password = await bcrypt.hash(unhashed_password, 10)
+    : null 
   return (knex('staff').update(toUpdate).where({id: staff_id}).returning('*'))
   .then(function([
     {
