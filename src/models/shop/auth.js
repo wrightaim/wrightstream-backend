@@ -23,6 +23,15 @@ function login(shop_username, email, password){
   })
 }
 
+function updateSelf(staff_id, shop_id) {
+  return shopModel.getOneStaff(staff_id, shop_id)
+  .then(self => {
+    delete self.password
+    return self
+  })
+}
+
 module.exports = {
-  login
+  login,
+  updateSelf
 }

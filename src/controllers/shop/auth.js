@@ -18,6 +18,7 @@ function login(req, res, next){
   })
   .catch(next)
 }
+
 function getAuthStatus(req, res, next){
     res.status(200).send({...req.claim})
 }
@@ -40,6 +41,18 @@ function isAuthenticated(req, res, next){
   })
 }
 
+function updateSelf(req, res, next) {
+  authModel.updateSelf(req.claim.id, req.claim.shop_id)
+  .then(self => {
+    req.claim.email = self.email
+    req.claim.first_name = self.first_name
+    req.claim.last_name = self.last_name
+    req.claim.photo = self.photo
+    req.claim.role_id = self.role_id  
+    next()
+  })
+}
+
 function isSelf(req, res, next){
   if(parseInt(req.params.staffId) !== req.claim.id){
     return next({ status: 401, message: 'Unauthorized' })
@@ -52,5 +65,6 @@ module.exports = {
   login,
   getAuthStatus,
   isAuthenticated,
+  updateSelf,
   isSelf,
 }
