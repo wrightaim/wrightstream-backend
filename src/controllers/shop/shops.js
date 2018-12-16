@@ -84,7 +84,7 @@ function createStaff(req, res, next) {
 }
 
 function updateStaff (req, res, next) {
-  shopModel.updateStaff(parseInt(req.params.shop_id), parseInt(req.params.staff_id), req.body.first_name, req.body.last_name, req.body.password, req.body.email, req.body.photo, req.body.role_id, req.body.archived)
+  shopModel.updateStaff(parseInt(req.params.shop_id), parseInt(req.params.staff_id), req.body.first_name, req.body.last_name, req.body.password, req.body.email, req.body.photo, parseInt(req.body.role_id), req.body.archived)
     .then(data => {
       res.status(200).send({data});
     })

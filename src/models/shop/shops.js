@@ -110,6 +110,12 @@ function getStaffByEmail(staff_email, shop_id) {
   .first())
 }
 
+function getStaffByRole (role_id, shop_id) {
+  return (knex('staff')
+    .where({role_id: role_id})
+    .andWhere({shop_id: shop_id}))
+}
+
 function getAllStaff(shop_id) {
   return (knex('staff').where({shop_id: shop_id}))
 }
@@ -149,8 +155,18 @@ const updateStaff = async (shop_id, staff_id, first_name, last_name, unhashed_pa
     const checkMainEmail = await getStaffByEmail(email, shop_id)
     if (typeof checkMainEmail === 'object' && checkOldEmail.email !== email) {
       throw {
-        status : 400,
+        status: 400,
         message: 'Staff email exists'
+      }
+    }
+  }
+  if (role_id) {
+    const checkOwners = await getStaffByRole(1, shop_id)
+    const checkRole = await getOneStaff(staff_id, shop_id)
+    if (checkRole.role_id === 1 && role_id !== 1 && checkOwners.length === 1) {
+      throw {
+        status: 400,
+        message: 'Cannot change role of only owner'
       }
     }
   }
