@@ -106,12 +106,10 @@ function getOneStaff(staff_id, shop_id) {
 
 function getStaffByEmail(staff_email, shop_id) {
   return (knex('staff').where({email: staff_email, shop_id: shop_id}).first())
-  .then(({password, ...data}) => data)
 }
 
 function getStaffByRole (role_id, shop_id) {
   return (knex('staff').where({role_id: role_id, shop_id: shop_id, archived: false}))
-  .map(({password, ...data}) => data)
 }
 
 function getAllStaff(shop_id) {
@@ -169,7 +167,7 @@ const updateStaff = async (shop_id, staff_id, first_name, last_name, unhashed_pa
       }
     }
   }
-  if (archived) {
+  if (archived === true) {
     const checkOwners = await getStaffByRole(1, shop_id)
     const checkRole = await getOneStaff(staff_id, shop_id)
     if (checkRole.role_id === 1 && checkOwners.length === 1) {
