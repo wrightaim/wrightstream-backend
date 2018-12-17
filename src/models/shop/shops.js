@@ -101,18 +101,22 @@ function removeShop(shop_id) {
 ////////////////////////////////////////////////////////////////////////////////
 function getOneStaff(staff_id, shop_id) {
   return (knex('staff').where({id: staff_id, shop_id: shop_id}).first())
+  .then(({password, ...data}) => data)
 }
 
 function getStaffByEmail(staff_email, shop_id) {
   return (knex('staff').where({email: staff_email, shop_id: shop_id}).first())
+  .then(({password, ...data}) => data)
 }
 
 function getStaffByRole (role_id, shop_id) {
   return (knex('staff').where({role_id: role_id, shop_id: shop_id, archived: false}))
+  .map(({password, ...data}) => data)
 }
 
 function getAllStaff(shop_id) {
   return (knex('staff').where({shop_id: shop_id}))
+  .map(({password, ...data}) => data)
 }
 
 function createStaff (body, shop_id) {
