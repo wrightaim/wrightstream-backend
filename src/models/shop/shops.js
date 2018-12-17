@@ -101,21 +101,24 @@ function removeShop(shop_id) {
 ////////////////////////////////////////////////////////////////////////////////
 function getOneStaff(staff_id, shop_id) {
   return (knex('staff').where({id: staff_id, shop_id: shop_id}).first())
+  .then(({password, ...data}) => data)
 }
 
 function getStaffByEmail(staff_email, shop_id) {
-  return (knex('staff')
-  .where({email: staff_email})
-  .andWhere({shop_id:shop_id})
-  .first())
+  return (knex('staff').where({email: staff_email, shop_id: shop_id}).first())
+}
+
+function getStaffByRole (role_id, shop_id) {
+  return (knex('staff').where({role_id: role_id, shop_id: shop_id, archived: false}))
 }
 
 function getAllStaff(shop_id) {
   return (knex('staff').where({shop_id: shop_id}))
+  .map(({password, ...data}) => data)
 }
 
-function createStaff(body, shop_id) {
-  let role = body.role || 1
+function createStaff (body, shop_id) {
+  let role_id = body.role_id || 1
   return getStaffByEmail(body.email, shop_id).then(data => {
     if (data)
       throw {
@@ -126,7 +129,7 @@ function createStaff(body, shop_id) {
   }).then(new_password => {
     return (knex('staff').insert({
       shop_id: shop_id,
-      role_id: role,
+      role_id: role_id,
       first_name: body.first_name,
       last_name: body.last_name,
       email: body.email,
@@ -143,13 +146,34 @@ function createStaff(body, shop_id) {
   })
 }
 
-const updateStaff = async (shop_id, staff_id, first_name, last_name, unhashed_password, email, photo, role, archived) => {
+const updateStaff = async (shop_id, staff_id, first_name, last_name, unhashed_password, email, photo, role_id, archived) => {
   if (email) {
-    const checkEmail = await getStaffByEmail(email, shop_id)
-    if (typeof checkEmail === 'object') {
+    const checkOldEmail = await getOneStaff(staff_id, shop_id)
+    const checkMainEmail = await getStaffByEmail(email, shop_id)
+    if (typeof checkMainEmail === 'object' && checkOldEmail.email !== email) {
       throw {
-        status : 400,
+        status: 400,
         message: 'Staff email exists'
+      }
+    }
+  }
+  if (role_id) {
+    const checkOwners = await getStaffByRole(1, shop_id)
+    const checkRole = await getOneStaff(staff_id, shop_id)
+    if (checkRole.role_id === 1 && role_id !== 1 && checkOwners.length === 1) {
+      throw {
+        status: 400,
+        message: 'Cannot change role of only shop owner'
+      }
+    }
+  }
+  if (archived === true) {
+    const checkOwners = await getStaffByRole(1, shop_id)
+    const checkRole = await getOneStaff(staff_id, shop_id)
+    if (checkRole.role_id === 1 && checkOwners.length === 1) {
+      throw {
+        status: 400,
+        message: 'Cannot archive only shop owner'
       }
     }
   }
@@ -163,18 +187,20 @@ const updateStaff = async (shop_id, staff_id, first_name, last_name, unhashed_pa
   email
     ? toUpdate.email = email
     : null
-  photo
+  photo || photo === ''
     ? toUpdate.photo = photo
     : null
-  role
-    ? toUpdate.role = role
+  role_id
+    ? toUpdate.role_id = role_id
     : null
   archived || archived === false
     ? toUpdate.archived = archived
     : null
-  return bcrypt.hash(unhashed_password, 10).then(password => {
-    return (knex('staff').update(toUpdate).where({id: staff_id}).returning('*'))
-  }).then(function([
+  unhashed_password
+    ? toUpdate.password = await bcrypt.hash(unhashed_password, 10)
+    : null 
+  return (knex('staff').update(toUpdate).where({id: staff_id}).returning('*'))
+  .then(function([
     {
       password,
       ...data

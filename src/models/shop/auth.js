@@ -8,8 +8,8 @@ function login(shop_username, email, password){
   .then(response => {
     if (response.archived) throw { status: 400, message: "Bad Request" }
     return shopModel.getStaffByEmail(email, response.id)
-    .then(data => {
-      if (!data) throw { status: 400, message: "Bad Request" }
+      .then(data => {
+      if (!data || data.archived) throw { status: 400, message: "Bad Request" }
       staff = data
       return bcrypt.compare(password, data.password)
     })
@@ -23,6 +23,15 @@ function login(shop_username, email, password){
   })
 }
 
+function updateSelf(staff_id, shop_id) {
+  return shopModel.getOneStaff(staff_id, shop_id)
+  .then(self => {
+    delete self.password
+    return self
+  })
+}
+
 module.exports = {
-  login
+  login,
+  updateSelf
 }

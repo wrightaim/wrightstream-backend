@@ -83,16 +83,24 @@ function createStaff(req, res, next) {
   .catch(next)
 }
 
-function updateStaff(req, res, next) {
-  if (!req.body.password) {
-    return next({ status: 400, message: 'Bad request'});
-  }
-  shopModel.updateStaff(parseInt(req.params.shop_id), parseInt(req.params.staff_id), req.body.first_name, req.body.last_name, req.body.password, req.body.email, req.body.photo, req.body.role, req.body.archived)
-  .then(data => {
-    res.status(200).send({ data });
-  })
-  .catch(next);
+function updateStaff (req, res, next) {
+  shopModel.updateStaff(parseInt(req.params.shop_id), parseInt(req.params.staff_id), req.body.first_name, req.body.last_name, req.body.password, req.body.email, req.body.photo, parseInt(req.body.role_id), req.body.archived)
+    .then(data => {
+      res.status(200).send({data});
+    })
+    .catch(next);
 }
+
+// function updateStaff (req, res, next) {
+//   if (!req.body.password) {
+//     return next({ status: 400, message: 'Bad request'});
+//   }
+//   shopModel.updateStaff(parseInt(req.params.shop_id), parseInt(req.params.staff_id), req.body.first_name, req.body.last_name, req.body.password, req.body.email, req.body.photo, req.body.role_id, req.body.archived)
+//   .then(data => {
+//     res.status(200).send({ data });
+//   })
+//   .catch(next);
+// }
 
 function removeStaff(req, res, next) {
   if (!req.params.staff_id) {
