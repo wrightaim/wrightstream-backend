@@ -104,16 +104,11 @@ function getOneStaff(staff_id, shop_id) {
 }
 
 function getStaffByEmail(staff_email, shop_id) {
-  return (knex('staff')
-  .where({email: staff_email})
-  .andWhere({shop_id:shop_id})
-  .first())
+  return (knex('staff').where({email: staff_email, shop_id: shop_id}).first())
 }
 
 function getStaffByRole (role_id, shop_id) {
-  return (knex('staff')
-    .where({role_id: role_id})
-    .andWhere({shop_id: shop_id}))
+  return (knex('staff').where({role_id: role_id, shop_id: shop_id, archived: false}))
 }
 
 function getAllStaff(shop_id) {
@@ -166,7 +161,17 @@ const updateStaff = async (shop_id, staff_id, first_name, last_name, unhashed_pa
     if (checkRole.role_id === 1 && role_id !== 1 && checkOwners.length === 1) {
       throw {
         status: 400,
-        message: 'Cannot change role of only owner'
+        message: 'Cannot change role of only shop owner'
+      }
+    }
+  }
+  if (archived) {
+    const checkOwners = await getStaffByRole(1, shop_id)
+    const checkRole = await getOneStaff(staff_id, shop_id)
+    if (checkRole.role_id === 1 && checkOwners.length === 1) {
+      throw {
+        status: 400,
+        message: 'Cannot archive only shop owner'
       }
     }
   }
