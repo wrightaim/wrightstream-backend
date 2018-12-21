@@ -148,13 +148,15 @@ function createStaff (body, shop_id) {
 
 const updateStaff = async (shop_id, staff_id, first_name, last_name, password, new_password, email, photo, role_id, archived) => {
   if (password) {
-    return getStaffByEmail(email, shop_id)
+    await getStaffByEmail(email, shop_id)
     .then(data => {
-      staff = data
       return bcrypt.compare(password, data.password)
     })
     .catch(bcrypt.MISMATCH_ERROR, () => {
-      throw {status: 401, message: "Unauthorized"}
+      throw {
+        status: 401,
+        message: "Unauthorized"
+      }
     })
   }
   if (email) {
