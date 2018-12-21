@@ -146,7 +146,17 @@ function createStaff (body, shop_id) {
   })
 }
 
-const updateStaff = async (shop_id, staff_id, first_name, last_name, unhashed_password, email, photo, role_id, archived) => {
+const updateStaff = async (shop_id, staff_id, first_name, last_name, password, new_password, email, photo, role_id, archived) => {
+  if (password) {
+    return getStaffByEmail(email, shop_id)
+    .then(data => {
+      staff = data
+      return bcrypt.compare(password, data.password)
+    })
+    .catch(bcrypt.MISMATCH_ERROR, () => {
+      throw {status: 401, message: "Unauthorized"}
+    })
+  }
   if (email) {
     const checkOldEmail = await getOneStaff(staff_id, shop_id)
     const checkMainEmail = await getStaffByEmail(email, shop_id)
@@ -196,8 +206,8 @@ const updateStaff = async (shop_id, staff_id, first_name, last_name, unhashed_pa
   archived || archived === false
     ? toUpdate.archived = archived
     : null
-  unhashed_password
-    ? toUpdate.password = await bcrypt.hash(unhashed_password, 10)
+  new_password
+    ? toUpdate.password = await bcrypt.hash(new_password, 10)
     : null 
   return (knex('staff').update(toUpdate).where({id: staff_id}).returning('*'))
   .then(function([
